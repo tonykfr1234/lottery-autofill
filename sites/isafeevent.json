@@ -1,0 +1,100 @@
+{
+  "id": "isafeevent",
+  "name": "全民數位素養自我評量（isafeevent.moe.edu.tw）",
+  "baseUrl": "https://isafeevent.moe.edu.tw",
+  "matchUrl": "isafeevent\\.moe\\.edu\\.tw",
+  "goalPerAccount": 60,
+  "gapSec": 150,
+  "probe": {
+    "waitForRe": "/signin|login|exam|records/",
+    "selectors": ["#email", "#captcha", ".btnStartExam", "table tbody tr"],
+    "groupSelector": "input.answer"
+  },
+  "login": {
+    "steps": [
+      { "a": "goto", "url": "${base}/exam/", "waitForRe": "/(exam|login)/", "timeoutMs": 40000 },
+      { "a": "eval", "expr": "location.href.includes('/login')", "save": "needLogin", "log": false },
+      {
+        "a": "if",
+        "cond": "${needLogin}",
+        "then": [
+          { "a": "log", "text": "需要登入，開始填入帳密" },
+          { "a": "type", "selector": "#email", "text": "${account.email}" },
+          { "a": "type", "selector": "#passowrd", "text": "${account.password}", "mask": true },
+          { "a": "ocr", "imageSelector": "#captcha", "file": "data/captcha/login.png", "save": "captcha", "mode": "auto", "digitsOnly": true, "timeoutMs": 180000 },
+          { "a": "type", "selector": "#id_captcha_1", "text": "${captcha}" },
+          { "a": "countdown", "sec": 2, "label": "送出登入" },
+          { "a": "click", "selector": "#form1 button[type=submit]", "danger": true },
+          { "a": "wait", "waitForRe": "/(exam|login)/", "timeoutMs": 25000 },
+          { "a": "eval", "expr": "location.href.includes('/login')", "save": "loginFailed", "log": false },
+          { "a": "assert", "expr": "!${loginFailed}", "message": "登入失敗：帳號、密碼或驗證碼錯誤" }
+        ]
+      },
+      { "a": "log", "text": "登入狀態確認完成" }
+    ]
+  },
+  "signup": {
+    "steps": [
+      { "a": "goto", "url": "${base}/signin/", "waitForRe": "/signin/", "timeoutMs": 40000 },
+      { "a": "type", "selector": "#email", "text": "${account.email}" },
+      { "a": "type", "selector": "#first_name", "text": "${account.nickname}" },
+      { "a": "type", "selector": "#password-input", "text": "${account.password}", "mask": true },
+      { "a": "type", "selector": "#passowrd2", "text": "${account.password}", "mask": true },
+      { "a": "select", "selector": "#county", "value": "${profile.countyValue}" },
+      { "a": "type", "selector": "#idno", "text": "${profile.idLast4}" },
+      { "a": "select", "selector": "#member_type", "value": "${profile.memberTypeValue}" },
+      { "a": "select", "selector": "#gender", "value": "${profile.genderValue}" },
+      { "a": "select", "selector": "#birth_y", "value": "${profile.birthYear}" },
+      { "a": "select", "selector": "#edu_level", "value": "${profile.eduValue}" },
+      { "a": "waitVisible", "selector": "#submit-btn", "timeoutMs": 90000, "label": "等 Turnstile 通過（人機驗證）" },
+      { "a": "countdown", "sec": 3, "label": "送出註冊" },
+      { "a": "click", "selector": "#submit-btn", "danger": true },
+      { "a": "sleep", "ms": 2500 },
+      { "a": "eval", "expr": "location.href", "save": "afterSignup" },
+      { "a": "shot", "path": "data/shots/signup-${account.email}.png" },
+      { "a": "log", "text": "註冊已送出（若停在 /signin/ 且有錯誤訊息，請看 data/shots 截圖）" }
+    ]
+  },
+  "unit": {
+    "steps": [
+      { "a": "goto", "url": "${base}/exam/", "waitForRe": "/exam/", "timeoutMs": 40000 },
+      { "a": "eval", "expr": "sessionStorage.clear(); 1", "log": false },
+      { "a": "sleep", "ms": 500 },
+      { "a": "countdown", "sec": 5, "label": "按下「開始評量」" },
+      { "a": "click", "selector": ".btnStartExam" },
+      { "a": "wait", "waitForRe": "/exam/do2/[0-9a-f-]{36}/", "timeoutMs": 45000 },
+      { "a": "log", "text": "第一頁：16 題量表，全部選「非常同意」" },
+      { "a": "answerByValue", "groupSelector": "input.answer", "value": "5" },
+      { "a": "eval", "expr": "document.querySelectorAll('input.answer:checked').length", "save": "p1", "log": false },
+      { "a": "assert", "expr": "${p1} === 16", "message": "第一頁沒有填滿 16 題" },
+      { "a": "countdown", "sec": 5, "label": "送出第一頁" },
+      { "a": "click", "selector": ".btnSendExam", "danger": true },
+      { "a": "wait", "waitForRe": "/exam/do/", "timeoutMs": 45000 },
+      { "a": "log", "text": "第二頁：16 題技能題，依答案庫比對" },
+      { "a": "answerByBank", "groupSelector": "input.answer", "bank": "sites/isafeevent/answers.json", "fallback": "fail" },
+      { "a": "eval", "expr": "document.querySelectorAll('input.answer:checked').length", "save": "p2", "log": false },
+      { "a": "assert", "expr": "${p2} === 16", "message": "第二頁沒有填滿 16 題" },
+      { "a": "countdown", "sec": 5, "label": "送出第二頁" },
+      { "a": "click", "selector": ".btnSendExam", "danger": true },
+      { "a": "wait", "waitForRe": "/exam/result/", "timeoutMs": 45000 },
+      { "a": "eval", "expr": "document.body.innerText.includes('獲得1次抽獎機會')", "save": "qualified", "log": true },
+      { "a": "scrollEnd", "dwellMs": 2000 },
+      { "a": "shot", "path": "data/shots/result-${account.email}-${rounds}.png" }
+    ]
+  },
+  "progress": {
+    "read": [
+      { "a": "goto", "url": "${base}/exam/records/", "waitForRe": "/exam/records/", "timeoutMs": 40000 },
+      { "a": "scrollEnd", "dwellMs": 5000 },
+      { "a": "eval", "expr": "document.querySelectorAll('table tbody tr').length", "save": "used", "log": false }
+    ],
+    "var": "used"
+  },
+  "notes": [
+    "登入頁：/login/（#email、#passowrd、#id_captcha_1、#form1 button[type=submit]）",
+    "註冊頁：/signin/（Turnstile 通過後 #submit-btn 才會從 d-none 變可見）",
+    "評量：/exam/ → /exam/do2/<uuid>/（第一頁）→ /exam/do/（第二頁）→ /exam/result/",
+    "次數：/exam/records/ 的 table tbody tr 列數 = 已用次數，上限 60",
+    "驗證碼：登入頁 #captcha 圖片；OCR 不可用時會等你把答案寫進 data/handoff-code.txt"
+  ]
+}

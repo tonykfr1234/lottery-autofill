@@ -1,0 +1,47 @@
+{
+  "defaultSite": "isafeevent",
+  "cdpPort": 9333,
+  "userDataDir": "data/profile",
+  "dataDir": "data",
+  "goalPerAccount": 60,
+  "gapSec": 150,
+  "maxFailures": 8,
+  "human": {
+    "dwellMs": 1000,
+    "answerGapMs": 1000,
+    "countdownSec": 5
+  },
+  "profile": {
+    "_note": "註冊表單的固定值；換站時改成新站要的欄位，站點 JSON 用 ${profile.xxx} 引用",
+    "countyValue": "4",
+    "idLast4": "0000",
+    "memberTypeValue": "3",
+    "genderValue": "1",
+    "birthYear": "1990",
+    "eduValue": "6"
+  },
+  "defaults": {
+    "password": "ChangeMe12345"
+  },
+  "mailboxes": {
+    "provider": "plusAlias",
+    "plusAlias": {
+      "base": "your.account@gmail.com"
+    },
+    "cloudflare": {
+      "zoneId": "",
+      "domain": "",
+      "destination": "your.account@gmail.com"
+    }
+  },
+  "nicknames": [
+    "自動化小幫手",
+    "除錯中的貓",
+    "凌晨三點的狐",
+    "嗑資料的鼠",
+    "雲端小水獺",
+    "跑腳本的鹿",
+    "鍵盤上的企鵝",
+    "零延遲貓頭鷹"
+  ]
+}

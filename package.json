@@ -1,0 +1,35 @@
+{
+  "name": "lottery-autofill",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "description": "設定檔驅動的抽獎 / 評量自動化作業器：換網址與規則就能換站，Windows 一鍵安裝",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "lottery-autofill": "./run.mjs"
+  },
+  "scripts": {
+    "doctor": "node run.mjs doctor",
+    "probe": "node run.mjs probe --site isafeevent",
+    "dry": "node run.mjs run --site isafeevent --max 1 --dry-run",
+    "run": "node run.mjs run --site isafeevent",
+    "report": "node run.mjs report",
+    "stop": "node run.mjs stop",
+    "teach": "node run.mjs teach --site isafeevent"
+  },
+  "keywords": [
+    "automation",
+    "cdp",
+    "chrome-devtools-protocol",
+    "lottery",
+    "autofill"
+  ],
+  "author": "tonykfr1234",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tonykfr1234/lottery-autofill.git"
+  }
+}

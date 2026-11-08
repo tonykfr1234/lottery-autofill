@@ -1,0 +1,15 @@
+# 依賴與產出物
+node_modules/
+__pycache__/
+*.pyc
+
+# 個人設定與執行資料（不進版控）
+config/config.json
+data/
+*.log
+*.png
+!docs/**/*.png
+
+# 系統檔
+.DS_Store
+Thumbs.db

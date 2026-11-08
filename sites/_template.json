@@ -1,0 +1,67 @@
+{
+  "id": "mysite",
+  "name": "新站點（請改名）",
+  "baseUrl": "https://example.com",
+  "matchUrl": "example\\.com",
+  "goalPerAccount": 10,
+  "gapSec": 120,
+  "_readme": [
+    "1. 把 baseUrl / matchUrl 改成新站；matchUrl 是正則字串，用來認出『這是本站的分頁』。",
+    "2. probe.selectors 放幾個關鍵元素，probe 指令會逐一檢查存在數量。",
+    "3. login.steps：先 goto 到登入後才看得到的頁面，用 eval 判斷是否被導到 /login，再 if 分支填帳密。",
+    "4. signup.steps：沒有註冊流程就整段刪掉（run.mjs 就不會自動建帳號，只會用 data/accounts.json 裡的帳號）。",
+    "5. unit.steps：一次抽獎機會要做的事。作答可用 answerByValue（每組同一個 value）或 answerByBank（依文字比對答案庫）。",
+    "6. progress.read：怎麼讀出目前已用次數，最後一個 eval 的 save 名稱要等於 progress.var。",
+    "7. 所有 selector 都是 CSS selector；文字比對需求用 clickText。",
+    "8. 送出、註冊這類不可逆的動作要標 \"danger\": true，--dry-run 時會跳過。"
+  ],
+  "probe": {
+    "waitForRe": "/",
+    "selectors": ["body"],
+    "groupSelector": "input[type=radio]"
+  },
+  "login": {
+    "steps": [
+      { "a": "goto", "url": "${base}/", "waitForRe": "/" },
+      { "a": "eval", "expr": "location.href.includes('/login')", "save": "needLogin", "log": false },
+      {
+        "a": "if",
+        "cond": "${needLogin}",
+        "then": [
+          { "a": "type", "selector": "input[name=email]", "text": "${account.email}" },
+          { "a": "type", "selector": "input[name=password]", "text": "${account.password}", "mask": true },
+          { "a": "click", "selector": "button[type=submit]", "danger": true },
+          { "a": "wait", "waitForRe": "/", "timeoutMs": 25000 },
+          { "a": "eval", "expr": "location.href.includes('/login')", "save": "loginFailed", "log": false },
+          { "a": "assert", "expr": "!${loginFailed}", "message": "登入失敗" }
+        ]
+      }
+    ]
+  },
+  "signup": {
+    "steps": [
+      { "a": "goto", "url": "${base}/signup", "waitForRe": "/signup" },
+      { "a": "type", "selector": "input[name=email]", "text": "${account.email}" },
+      { "a": "type", "selector": "input[name=password]", "text": "${account.password}", "mask": true },
+      { "a": "click", "selector": "button[type=submit]", "danger": true },
+      { "a": "sleep", "ms": 2000 }
+    ]
+  },
+  "unit": {
+    "steps": [
+      { "a": "goto", "url": "${base}/", "waitForRe": "/" },
+      { "a": "clickText", "selector": "button,a", "text": "開始" },
+      { "a": "answerByValue", "groupSelector": "input[type=radio]", "value": "5" },
+      { "a": "countdown", "sec": 3, "label": "送出" },
+      { "a": "click", "selector": "button[type=submit]", "danger": true },
+      { "a": "wait", "waitForRe": "/", "timeoutMs": 30000 }
+    ]
+  },
+  "progress": {
+    "read": [
+      { "a": "goto", "url": "${base}/", "waitForRe": "/" },
+      { "a": "eval", "expr": "0", "save": "used", "log": false }
+    ],
+    "var": "used"
+  }
+}
