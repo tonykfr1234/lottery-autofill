@@ -457,9 +457,13 @@ async function main() {
   }
 }
 
+// 用 exitCode 而不是 process.exit()：Windows 上強制結束會讓 undici 的 keep-alive socket
+// 在 libuv 收尾時觸發 "Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)"。
 main()
-  .then((code) => process.exit(code || 0))
+  .then((code) => {
+    process.exitCode = code || 0;
+  })
   .catch((e) => {
     console.error(`\n[錯誤] ${e.message}`);
-    process.exit(1);
+    process.exitCode = 1;
   });
