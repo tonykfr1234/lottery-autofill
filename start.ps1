@@ -1,4 +1,4 @@
-# start.ps1 — 開始跑（Windows）
+﻿# start.ps1 — 開始跑（Windows）
 #   powershell -ExecutionPolicy Bypass -File start.ps1
 #   powershell -File start.ps1 -Site isafeevent -Max 0 -DryRun
 param(

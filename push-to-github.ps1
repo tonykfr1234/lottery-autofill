@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   把本目錄推上 GitHub（先建 repo、再 push）。
 

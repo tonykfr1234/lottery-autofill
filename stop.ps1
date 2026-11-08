@@ -1,4 +1,4 @@
-# stop.ps1 — 停下來（Windows）
+﻿# stop.ps1 — 停下來（Windows）
 # 寫入 data/stop.flag，執行中的流程會在下一步結束；再等 2 秒後一併收掉 node 子行程。
 $ErrorActionPreference = 'SilentlyContinue'
 $root = $PSScriptRoot

@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   lottery-autofill 一鍵安裝（Windows）
 
